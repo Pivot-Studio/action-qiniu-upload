@@ -11,10 +11,9 @@ async function run(): Promise<void> {
     const destDir = core.getInput('dest_dir');
     const ignoreSourceMap = core.getInput('ignore_source_map') === 'true';
 
-    const token = genToken(bucket, ak, sk);
 
     upload(
-      token,
+      bucket, ak, sk,
       sourceDir,
       destDir,
       ignoreSourceMap,
