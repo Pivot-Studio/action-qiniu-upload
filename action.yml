@@ -19,13 +19,17 @@ inputs:
     description: 'dest dir, namely key prefix'
     default: '/'
     required: false
-  # overwrite:
-  #   description: 'overwrite the file of same key in bucket'
-  #   default: true
-  #   required: false
+  refresh_urls:
+    description: 'list of urls to refresh'
+    default: '[]'
+    required: false
+  refresh_dirs:
+    description: 'list of dirs to refresh'
+    default: '[]'
+    required: false
   ignore_source_map:
     description: 'ignore source maps'
-    default: true
+    default: 'true'
     required: false
 runs:
   using: 'node12'

@@ -10,6 +10,8 @@ async function run(): Promise<void> {
     const sourceDir = core.getInput('source_dir');
     const destDir = core.getInput('dest_dir');
     const ignoreSourceMap = core.getInput('ignore_source_map') === 'true';
+    const refreshUrls:string[] = JSON.parse(core.getInput('refresh_urls'));
+    const refreshDirs:string[] = JSON.parse(core.getInput('refresh_dirs'));
 
 
     upload(
@@ -17,11 +19,13 @@ async function run(): Promise<void> {
       sourceDir,
       destDir,
       ignoreSourceMap,
+      refreshUrls,
+      refreshDirs,
       (file, key) => core.info(`Success: ${file} => [${bucket}]: ${key}`),
       () => core.info('Done!'),
       (error) => core.setFailed(error.message),
     );
-  } catch (error) {
+  } catch (error:any) {
     core.setFailed(error.message);
   }
 }

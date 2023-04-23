@@ -12584,7 +12584,9 @@ function run() {
             const sourceDir = core.getInput('source_dir');
             const destDir = core.getInput('dest_dir');
             const ignoreSourceMap = core.getInput('ignore_source_map') === 'true';
-            upload_1.upload(bucket, ak, sk, sourceDir, destDir, ignoreSourceMap, (file, key) => core.info(`Success: ${file} => [${bucket}]: ${key}`), () => core.info('Done!'), (error) => core.setFailed(error.message));
+            const refreshUrls = JSON.parse(core.getInput('refresh_urls'));
+            const refreshDirs = JSON.parse(core.getInput('refresh_dirs'));
+            upload_1.upload(bucket, ak, sk, sourceDir, destDir, ignoreSourceMap, refreshUrls, refreshDirs, (file, key) => core.info(`Success: ${file} => [${bucket}]: ${key}`), () => core.info('Done!'), (error) => core.setFailed(error.message));
         }
         catch (error) {
             core.setFailed(error.message);
@@ -39406,7 +39408,7 @@ const token_1 = __webpack_require__(871);
 function normalizePath(input) {
     return input.replace(/^\//, '');
 }
-function upload(bucket, ak, sk, srcDir, destDir, ignoreSourceMap, onProgress, onComplete, onFail) {
+function upload(bucket, ak, sk, srcDir, destDir, ignoreSourceMap, refreshUrls, refreshDirs, onProgress, onComplete, onFail) {
     const baseDir = path_1.default.resolve(process.cwd(), srcDir);
     const files = glob_1.default.sync(`${baseDir}/**/*`, { nodir: true });
     const config = new qiniu_1.default.conf.Config();
@@ -39434,6 +39436,18 @@ function upload(bucket, ak, sk, srcDir, destDir, ignoreSourceMap, onProgress, on
     p_all_1.default(tasks, { concurrency: 5 })
         .then(onComplete)
         .catch(onFail);
+    const mac = new qiniu_1.default.auth.digest.Mac(ak, sk);
+    let cdn = new qiniu_1.default.cdn.CdnManager(mac);
+    cdn.refreshUrls(refreshUrls, function (err, body, info) {
+        if (err) {
+            onFail(new Error(`Refresh failed: ${err}, body: ${body}, info: ${info}`));
+        }
+    });
+    cdn.refreshDirs(refreshDirs, function (err, body, info) {
+        if (err) {
+            onFail(new Error(`Refresh failed: ${err}, body: ${body}, info: ${info}`));
+        }
+    });
 }
 exports.upload = upload;
 

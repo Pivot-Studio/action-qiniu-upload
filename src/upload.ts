@@ -14,6 +14,8 @@ export function upload(
   srcDir: string,
   destDir: string,
   ignoreSourceMap: boolean,
+  refreshUrls: string[],
+  refreshDirs: string[],
   onProgress: (srcFile: string, destFile: string) => void,
   onComplete: () => void,
   onFail: (errorInfo: any) => void,
@@ -51,4 +53,16 @@ export function upload(
   pAll(tasks, { concurrency: 5 })
     .then(onComplete)
     .catch(onFail);
+  const mac = new qiniu.auth.digest.Mac(ak, sk);
+  let cdn = new qiniu.cdn.CdnManager(mac);
+  cdn.refreshUrls(refreshUrls, function (err, body, info) {
+    if (err) {
+      onFail(new Error(`Refresh failed: ${err}, body: ${body}, info: ${info}`))
+    }
+  });
+  cdn.refreshDirs(refreshDirs, function (err, body, info) {
+    if (err) {
+      onFail(new Error(`Refresh failed: ${err}, body: ${body}, info: ${info}`))
+    }
+  });
 }
